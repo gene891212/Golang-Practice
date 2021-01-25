@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -33,12 +34,14 @@ func main() {
 	fmt.Println(cur)
 	for cur.Next(context.Background()) {
 		// To decode into a struct, use cursor.Decode()
-		result := struct{
-			Account string
+		result := struct {
+			Account  string
 			Password string
 		}{}
 		err := cur.Decode(&result)
-		if err != nil { log.Fatal(err) }
+		if err != nil {
+			log.Fatal(err)
+		}
 		// do something with result...
 		fmt.Println(result)
 		fmt.Printf("%+v\n", result)
