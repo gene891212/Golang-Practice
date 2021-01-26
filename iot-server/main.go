@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"net/http"
+	"time"
 )
 
 type User struct {
@@ -18,7 +17,7 @@ type User struct {
 	Password string `json:"password"`
 }
 
-func insertData(account, password string) {
+func insertData(user User) {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
@@ -32,14 +31,18 @@ func insertData(account, password string) {
 	defer client.Disconnect(ctx)
 
 	collection := client.Database("iot").Collection("account")
-	podcastResult, err := collection.InsertOne(ctx, bson.D{
-		{"account", account},
-		{"password", password},
-	})
-	fmt.Println(podcastResult)
+	_, err = collection.InsertOne(ctx, user)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func allUser(w http.ResponseWriter, r *http.Request) {
+	//body, err := ioutil.ReadAll(r.Body)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(body)
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
@@ -58,43 +61,48 @@ func allUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer cur.Close(context.Background())
+
+	//var test []interface{}
+	//err = cur.All(context.Background(), &test)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
 	results := []User{}
 	for cur.Next(context.Background()) {
-		// To decode into a struct, use cursor.Decode()
 		result := User{}
 		err := cur.Decode(&result)
 		if err != nil {
 			log.Fatal(err)
 		}
-		// do something with result...
 		results = append(results, result)
-		fmt.Println(result)
 	}
+
 	j, _ := json.Marshal(results)
-	fmt.Fprintf(w, string(j))
+	_, err = fmt.Fprintf(w, string(j))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func addAccount(w http.ResponseWriter, r *http.Request) {
+func createUser(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	for k, v := range r.Form {
-		fmt.Println(k, v)
-	}
 	infomation := User{
 		r.FormValue("account"),
 		r.FormValue("password"),
 	}
-	insertData(r.FormValue("account"), r.FormValue("password"))
+	insertData(infomation)
+
 	j, err := json.Marshal(infomation)
 	if err != nil {
 		log.Fatal("json format error", err)
 	}
-	fmt.Println(j)
-	//fmt.Fprintf(w, string(j))
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusBadRequest)
+	fmt.Fprintf(w, string(j))
 }
 
 func main() {
-	http.HandleFunc("/create", addAccount)
+	http.HandleFunc("/create", createUser)
 	http.HandleFunc("/", allUser)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
