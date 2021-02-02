@@ -22,5 +22,9 @@ Collection name: account
 go run main.go
 ```
 
-Entering `localhost:9090` to get all the user,
+Entering `localhost:9090/all` to get all the user,
  and entering `localhost:9090/create?account=<account>&password=<password>` to create an account
+
+## Reference
+
+- [Enable CORS on a Go Web Server](https://flaviocopes.com/golang-enable-cors/)
