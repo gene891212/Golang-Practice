@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"time"
@@ -17,7 +17,9 @@ import (
 )
 
 func allUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	libs.SetupResponse(&w)
+	r.ParseForm()
 
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
@@ -32,17 +34,24 @@ func allUser(w http.ResponseWriter, r *http.Request) {
 	defer client.Disconnect(ctx)
 
 	collection := client.Database("iot").Collection("account")
-	cur, err := collection.Find(context.Background(), bson.D{})
+	var find bson.M
+	if value := r.FormValue("account"); value != "" {
+		find = bson.M{"account": value}
+	} else {
+		find = bson.M{}
+	}
+	cur, err := collection.Find(context.Background(), find)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cur.Close(context.Background())
 
-	//var test []interface{}
-	//err = cur.All(context.Background(), &test)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	// var test []interface{}
+	// err = cur.All(context.Background(), &test)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Fprintln(w, test)
 
 	results := []stru.UserInfo{}
 	for cur.Next(context.Background()) {
@@ -55,10 +64,12 @@ func allUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	j, _ := json.Marshal(results)
-	_, err = fmt.Fprintf(w, string(j))
 	if err != nil {
 		log.Fatal(err)
 	}
+	t, _ := template.ParseFiles("./find.html")
+	t.Execute(w, struct{ Message string }{Message: string(j)})
+
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +79,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/create", createUser)
-	http.HandleFunc("/all", allUser)
+	http.HandleFunc("/", allUser)
 
 	err := http.ListenAndServe(":12345", nil)
 	if err != nil {
