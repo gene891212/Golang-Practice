@@ -9,6 +9,7 @@ import (
 
 	"github.com/iot/stru"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -32,6 +33,50 @@ func InsertData(user stru.UserInfo) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// FindAccount ...
+func FindAccount(account string) string {
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
+
+	collection := client.Database("iot").Collection("account")
+	var find bson.M
+	if account != "" {
+		find = bson.M{"account": account}
+	} else {
+		find = bson.M{}
+	}
+
+	cur, err := collection.Find(context.Background(), find)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(context.Background())
+
+	results := []stru.UserInfo{}
+	for cur.Next(context.Background()) {
+		result := stru.UserInfo{}
+		err := cur.Decode(&result)
+		results = append(results, result)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	allUser, err := json.Marshal(results)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(allUser)
 }
 
 // SetupResponse ...

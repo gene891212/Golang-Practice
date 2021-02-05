@@ -11,7 +11,7 @@ import (
 // CreateUser ...
 func CreateUser(c *gin.Context) {
 	var user stru.UserInfo
-	err := c.ShouldBindQuery(&user)
+	err := c.ShouldBind(&user)
 	if err == nil {
 		InsertData(user)
 		now, _ := time.Now().MarshalText()
@@ -23,10 +23,4 @@ func CreateUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-
-	// message := stru.CreateSuccess{
-	// 	Timestamp: string(now),
-	// 	Status:    200,
-	// 	Message:   "account created successful",
-	// }
 }

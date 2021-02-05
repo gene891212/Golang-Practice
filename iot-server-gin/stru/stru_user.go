@@ -5,8 +5,6 @@ type UserInfo struct {
 	Password string `json:"password" form:"password"`
 }
 
-type CreateSuccess struct {
-	Timestamp string `json:"timestamp"`
-	Status    int    `json:"status"`
-	Message   string `json:"message"`
+type IndexData struct {
+	AllAccount string
 }
