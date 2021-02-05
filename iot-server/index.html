@@ -1,0 +1,18 @@
+<h1>Search Account: </h1>
+<form autocomplete="off" method="get">
+    <input type="text" name="findAccount">
+    <button type="submit">search</button>
+</form>
+<p>{{.Message}}</p>
+
+<hr>
+
+<h1>Create Account</h1>
+<form method="POST" autocomplete="off">
+    <p>
+        Account: <input type="text" name="account">
+        Password: <input type="password" name="password">
+        <button type="submit">submit</button>
+    </p>
+</form>
+<p>{{.Status}}</p>

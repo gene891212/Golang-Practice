@@ -9,8 +9,9 @@ import (
 )
 
 // CreateUser ...
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+func CreateUser(w http.ResponseWriter, r *http.Request) string {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	var j []byte
 	switch r.Method {
 
 	case "POST":
@@ -30,12 +31,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 			Message:   "account created successful",
 		}
 
-		err := json.NewEncoder(w).Encode(message)
-		if err != nil {
-			RaiseError(w, 500, err.Error(), r.URL.Path)
-		}
+		j, _ = json.Marshal(message)
 	default:
 		// t, _ := template.ParseFiles("./create.html")
 		// t.Execute(w, nil)
+		// RaiseError(w, 500, "I don't know.", r.URL.Path)
 	}
+	return string(j)
 }

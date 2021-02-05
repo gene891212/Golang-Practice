@@ -35,7 +35,7 @@ func allUser(w http.ResponseWriter, r *http.Request) {
 
 	collection := client.Database("iot").Collection("account")
 	var find bson.M
-	if value := r.FormValue("account"); value != "" {
+	if value := r.FormValue("findAccount"); value != "" {
 		find = bson.M{"account": value}
 	} else {
 		find = bson.M{}
@@ -67,8 +67,18 @@ func allUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t, _ := template.ParseFiles("./find.html")
-	t.Execute(w, struct{ Message string }{Message: string(j)})
+	t, err := template.ParseFiles("./index.html")
+	if err != nil {
+		libs.RaiseError(w, 500, err.Error(), r.URL.Path)
+	}
+	message := libs.CreateUser(w, r)
+	t.Execute(w, struct {
+		Message string
+		Status  string
+	}{
+		Message: string(j),
+		Status:  message,
+	})
 
 }
 

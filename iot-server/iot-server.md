@@ -1,5 +1,7 @@
 # Iot-Server
 
+Using golang http package build a sample server connect with MongoDB that can create and search account. 
+
 ## Environment
 
 Need to have Golang installed on your system, and either have MongoDB installed locally
@@ -7,7 +9,7 @@ Need to have Golang installed on your system, and either have MongoDB installed 
 - Go modules
 
 ```sh
-go get go.mongodb.org/mongo-driver/mongo
+go mode download
 ```
 
 - MongoDB
@@ -22,8 +24,7 @@ Collection name: account
 go run main.go
 ```
 
-Entering `localhost:9090/all` to get all the user,
- and entering `localhost:9090/create?account=<account>&password=<password>` to create an account
+Entering `localhost:12345/` in your browser
 
 ## Reference
 
