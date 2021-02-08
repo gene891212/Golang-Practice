@@ -10,7 +10,7 @@ import (
 )
 
 func find(c *gin.Context) {
-	result := libs.FindAccount(c.Param("account"))
+	result := libs.FindAccount(c.Query("findAccount"))
 
 	data := stru.IndexData{
 		AllAccount: result,
