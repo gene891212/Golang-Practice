@@ -40,22 +40,22 @@ func callback(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
-			action := linebot.DatetimePickerAction{
+			action := linebot.NewDatetimePickerAction(
 				"Select date",
 				"storeId=12345",
 				"datetime",
 				"2017-12-25t00:00",
 				"2018-01-24t23:59",
 				"2017-12-25t00:00",
-			}
+			)
 			switch msg := event.Message.(type) {
 			case *linebot.TextMessage:
 				if msg.Text == "Hi" {
-					template := linebot.NewConfirmTemplate("Hello World", &action, &action)
+					template := linebot.NewConfirmTemplate("Hello World", action, action)
 					message := linebot.NewTemplateMessage("Sorry :(, please update your app.", template)
-					err := bot.ReplyMessage(event.ReplyToken, message)
+					_, err := bot.ReplyMessage(event.ReplyToken, message).Do()
 					if err != nil {
-						fmt.Println("hi", err)
+						fmt.Println(err)
 					}
 				} else {
 					_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(msg.Text)).Do()
